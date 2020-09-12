@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from strategy import signals
+from strategy import signals, stocks
 from stocks import data
 
 
@@ -19,12 +19,18 @@ class Stock:
         positions = pd.DataFrame(index=self.signal.index).fillna(0.0)
 
         positions["stock"] = Stock.num_of_stock * self.signal["signals"]
-        portfolio = positions.multiply(self.stock_data["Open"], axis=0)
+        portfolio = positions.multiply(self.stock_data["Open"], axis=0)  # we buy stock at the open price and multiply +1 for buy, 0 for do nothing, -1 to sell
+        
+        portfolio["ticker"] = [self.ticker] * self.stock_data.shape[0]  # add the ticker name to the dataframe
+        switch_cols = ["ticker", "stock", "holdings", "cash", "total", "returns"]  # switch the columns to better match the formatting in the other csv files
+        portfolio = portfolio.reindex(columns=switch_cols)
 
         pos_diff = positions.diff()
+        
         portfolio["holdings"] = (positions.multiply(self.stock_data['Open'], axis=0)).sum(axis=1)
         portfolio['cash'] = Stock.initial_capital - (pos_diff.multiply(self.stock_data['Open'], axis=0))\
             .sum(axis=1).cumsum()
+        
         portfolio['total'] = portfolio['cash'] + portfolio['holdings']
         portfolio['returns'] = portfolio['total'].pct_change()
         return portfolio
@@ -54,3 +60,10 @@ class Stock:
         plt.suptitle(f"Portfolio Value for {self.ticker}")
         plt.title(f"Sharpe Ratio: {self.get_sharpe()}", size="small")
         plt.show()
+        
+ def concatenate_dataframes():  # allows us to join dataframes for every stock together, allows for easy exporting to database
+    first_df = Stock(stocks[0]).execute_strategy()
+    for stock in stocks[1:]:
+        first_df = first_df.append(Stock(stock).execute_strategy())
+    first_df = first_df.round(4)
+    return first_df
