@@ -29,14 +29,14 @@ class Stock:
         portfolio['returns'] = portfolio['total'].pct_change()
         return portfolio
 
-    def get_sharpe(self):
+    def get_sharpe(self):  # Sharpe Ratio is a measure of performance vs. risk, the bigger the better
         returns = self.execute_strategy()
         returns = returns["returns"]
         sharpe_ratio = np.sqrt(252) * (returns.mean() / returns.std())
         sharpe_ratio = sharpe_ratio.round(4)
         return sharpe_ratio
 
-    def plot_holdings(self):
+    def plot_holdings(self):  # shows holdings for a stock, and when we buy/sell it
         portfolio = self.execute_strategy()
         # signal = signals.loc[self.ticker, :]
         fig = plt.figure()
@@ -54,7 +54,3 @@ class Stock:
         plt.suptitle(f"Portfolio Value for {self.ticker}")
         plt.title(f"Sharpe Ratio: {self.get_sharpe()}", size="small")
         plt.show()
-
-
-ifspf = Stock("IFSPF")
-ifspf.plot_holdings()
