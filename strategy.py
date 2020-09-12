@@ -18,11 +18,12 @@ signals["short avg"] = data["Open"].rolling(window=short, min_periods=1, center=
 signals["long avg"] = data["Open"].rolling(window=long, min_periods=1, center=False).mean()
 signals["short vol"] = data["Open"].rolling(window=short, min_periods=1, center=False).std()
 signals["long vol"] = data["Open"].rolling(window=long, min_periods=1, center=False).std()
-# I initially also used volatility as part of the strategy, but that didn't seem to work as well.
-# I kept the code here to continue doing tests with it
+
 signals = signals.fillna(0)
 
-signals["signals"][short:] = np.where((signals["short avg"][short:] > signals["long avg"][short:]), 1, 0)
+signals["signals"][short:] = np.where((signals["short avg"][short:] > signals["long avg"][short:]) & 
+                                      (signals["long vol"][short] > signals["short vol"][short:]), 1, 0)
+# this is the core part of our strategy, we buy stock if short avg is above long average and long volatility is above short volatility
 signals = signals.fillna(0)
 
 signals["positions"] = signals["signals"].diff()
