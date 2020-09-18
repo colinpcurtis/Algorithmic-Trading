@@ -67,3 +67,12 @@ class Stock:
         first_df = first_df.append(Stock(stock).execute_strategy())
     first_df = first_df.round(4)
     return first_df
+
+def get_best_performers():  # gets dictionary of the best performing stocks, ranked by percent returns
+    returns = {}
+    for stock in stocks:
+        end_value = list(Stock(stock).execute_strategy()["total"])[-1]  # end cash value of the portfolio
+        pct_returns = ((end_value - Stock.initial_capital) / Stock.initial_capital) * 100
+        returns[stock] = pct_returns
+    sorted_dict = sorted(returns.items(), key=operator.itemgetter(1), reverse=True)
+    return sorted_dict
